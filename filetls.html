@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileTLS</title>
+    
+    <!-- The below stylesheet isn't external so that the service worker doesn't overwrite it -->
+    <style>
+
+        body {
+            font-family: sans-serif;
+            background: #111111;
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin: 1em;
+        }
+    
+        .green, a, ul ::marker {
+            color: #00ff00;
+        }
+    
+        ::marker {
+            font-size: 1.17em;
+        }
+    
+        code {
+            background: #333333;
+            border-radius: 10px;
+            padding: 0.2em;
+        }
+
+        #error-container, #message-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000bb;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #error, #message {
+            width: 60%;
+            padding: 1em;
+            background: #555555;
+            border-radius: 10px;
+            font-size: 1.3rem;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        #reload, #ok {
+            background: #00ff00;
+            color: #ffffff;
+            border: none;
+            font-size: 1.5em;
+            border-radius: 10px;
+            padding: 0.3em;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>File<span class="green">TLS</span>://</h1>
+    <p>Upgrade your <code>file://</code> protocol</p>
+    <ul>
+        <li>Host over TLS</li>
+        <li>No install required</li>
+        <li>Completely client-side, no tracking, no account</li>
+    </ul>
+    <ol>
+        <li>
+            <h3><a href="javascript:location.reload()">Reload</a> the page</h3>
+            <p>to ensure that the <code>Service Worker</code> is running.</p>
+        </li>
+        <li>
+            <h3><a id="upload" href="javascript:void(0)">Upload</a> your directory</h3>
+            <p>This will be the directory used in the static file server.</p>
+        </li>
+        <li>
+            <h3>Navigate to a file!</h3>
+            <p>Your file server is running! If you opened a directory with a file named <code>index.html</code>, visit <a href="index.html">/index.html</a>.</p>
+        </li>
+        <li>
+            <h3><a id="unregister" href="javascript:void(0)">Unregister</a> the service worker</h3>
+            <p>once you're done to regain access to the rest of this site.</p>
+        </li>
+    </ol>
+
+    <div id="error-container">
+        <div id="error">
+            <h1>Error</h1>
+            <p>An error has occurred. Press <b>Ctrl Shift J</b> or <b>Cmd Shift J</b> for more information. This is likely because you need to reload.</p>
+            <button id="reload">Reload</button>
+        </div>
+    </div>
+
+    <div id="message-container">
+        <div id="message">
+            <h1 id="message-title"></h1>
+            <p id="message-content"></p>
+            <button id="ok">OK</button>
+        </div>
+    </div>
+
+    <!-- The below script isn't external so the that service worker doesn't overwrite it -->
+    <script>
+
+        // Error reload button
+        const reload = document.querySelector("#reload");
+
+        // Find the error
+        const error = document.querySelector("#error-container");
+
+        reload.addEventListener("click", function() {
+            
+            location.reload();
+
+        });
+        
+        // Start the service worker
+        let worker;
+        
+        // Check if there is an active service worker
+        if (navigator.serviceWorker.controller) {
+        
+            // If there is a service worker, set worker to it
+            worker = navigator.serviceWorker.controller;
+        
+        } else {
+        
+            // If there is not a service worker, register one
+            navigator.serviceWorker.register("worker.js").then(function(registration) {
+        
+                worker = registration.active;
+        
+            });
+            
+        
+        // Find the upload element
+        const upload = document.querySelector("#upload");
+        }
+        
+        // Send the directory to the service worker
+        upload.addEventListener("click", async function() {
+
+            // Catch errors
+            try {
+        
+                const directory = await showDirectoryPicker();
+        
+                worker.postMessage(directory);
+
+            } catch(err) {
+
+                error.style.display = "flex";
+
+                // Re-throw the error
+                throw err;
+
+            }
+        
+        });
+
+        // Unregister
+        const unregister = document.querySelector("#unregister");
+
+        const message = document.querySelector("#message-container");
+
+        const title = document.querySelector("#message-title");
+
+        const content = document.querySelector("#message-content");
+
+        unregister.addEventListener("click", async function() {
+
+            const registration = await navigator.serviceWorker.getRegistration();
+            
+            // Check for a registration
+            if (registration) {
+
+                // Unregister the worker
+                registration.unregister();
+
+                // Provide user feedback
+                title.innerText = "Unregistration successful";
+
+                content.innerText = "The service worker has been unregistered. You can now view the site normally.";
+
+                message.style.display = "flex";
+
+            } else {
+
+                // Tell the user that there isn't a service worker to unregister
+                title.innerText = "Error";
+
+                content.innerText = "There is no active service worker to unregister."
+
+                message.style.display = "flex";
+                
+            }
+
+        });
+
+        // Give the unregistration message's OK button functionality
+        const ok = document.querySelector("#ok");
+
+        ok.addEventListener("click", function() {
+            
+            message.style.display = "none";
+
+        });
+
+    </script>
+</body>
+</html>
