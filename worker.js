@@ -15,11 +15,8 @@ self.addEventListener("fetch", function(event) {
 
     // Don't overwrite cross-site requests, filetls.html, and ?overwritefiletls=1
     if (url.pathname == "/filetls.html" || url.hostname != location.hostname || url.searchParams.get("overwritefiletls") == "1") {
-        
-        // Respond with the real file
-        event.respondWith(fetch(event.request.url, {mode: "no-cors"}));
 
-        // Cancel other logic
+        // Cancel logic, the browser will handle it
         return;
         
     }
