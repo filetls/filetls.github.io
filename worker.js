@@ -160,6 +160,8 @@ self.addEventListener("fetch", function(event) {
                         reupload.addEventListener("click", async function() {
                         
                             navigator.serviceWorker.controller.postMessage(await showDirectoryPicker());
+
+                            location.reload();
                             
                         });
 
