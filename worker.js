@@ -155,7 +155,7 @@ self.addEventListener("fetch", function(event) {
                         });
 
                         // Reupload link
-                        const reupload = document.querySelectorAll("#reupload");
+                        const reupload = document.querySelector("#reupload");
 
                         reupload.addEventListener("click", async function() {
                         
