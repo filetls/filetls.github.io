@@ -116,6 +116,7 @@ self.addEventListener("fetch", function(event) {
                     <ul>
                         <li><a href="javascript:void(0)" id="overwrite">Overwrite and fetch normally</a></li>
                         <li><a href="javascript:void(0)" id="index">Try index.html</a></li>
+                        <li><a href="javascript:void(0)" id="reupload">Reupload Directory</a></li>
                         <li><a href="/filetls.html">Back to FileTLS home</a></li>
                     </ul>
                     <script>
@@ -151,6 +152,15 @@ self.addEventListener("fetch", function(event) {
                             // Update location to url
                             location.href = url.href;
 
+                        });
+
+                        // Reupload link
+                        const reupload = document.querySelectorAll("#reupload");
+
+                        reupload.addEventListener("click", async function() {
+                        
+                            navigator.serviceWorker.controller.postMessage(await showDirectoryPicker());
+                            
                         });
 
                     </script>
