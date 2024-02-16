@@ -165,6 +165,8 @@ self.addEventListener("fetch", function(event) {
                             
                         });
 
+                        reupload.focus();
+
                     </script>
                 </body>
                 </html>
